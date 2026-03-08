@@ -1,0 +1,86 @@
+---
+import "../styles/global.css";
+import TopBar from "../components/TopBar.astro";
+import Sidebar from "../components/Sidebar.astro";
+import StatusBar from "../components/StatusBar.astro";
+import IdeOverlays from "../components/IdeOverlays.astro";
+import { ContentStore, Language } from "../data/content";
+import type { Locale } from "../data/types";
+
+interface Props {
+  title?: string;
+  lang?: Locale;
+}
+
+const { title, lang: propLang } = Astro.props;
+const lang = propLang ?? ContentStore.resolveLocaleFromPathname(Astro.url.pathname);
+const ui = ContentStore.getUiCopy(lang);
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={ui.layout.metaDescription} />
+  <title>{title}</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@1" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body class="scanlines bg-bg-primary min-h-screen font-mono text-editor-text overflow-x-hidden">
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-neon-cyan opacity-[0.04] rounded-full blur-3xl pointer-events-none z-0"></div>
+  <div class="fixed bottom-1/4 right-1/4 w-96 h-96 bg-neon-purple opacity-[0.04] rounded-full blur-3xl pointer-events-none z-0"></div>
+
+  <div id="ide-app" class="relative z-10 flex flex-col min-h-screen md:h-screen backdrop-blur-[1px] ide--closed">
+    <TopBar lang={lang} />
+
+    <div class="flex flex-1 overflow-hidden" data-workspace>
+      <div class="flex w-full overflow-hidden border-y border-[#3a6a98] md:border md:border-[#3a6a98] bg-bg-secondary/20 shadow-[0_18px_40px_rgba(4,12,22,0.28)]">
+        <Sidebar lang={lang} />
+
+        <main class="flex-1 overflow-y-auto bg-bg-secondary/25" data-file-workspace>
+          <div class="px-3 py-2 text-[10px] font-bold text-editor-dim tracking-widest uppercase border-b border-border bg-[#0b223c] flex items-center gap-2">
+            <span id="active-file-type" class={`text-[9px] font-bold px-1 py-[1px] rounded ${ui.fileMeta.home.colorClass}`}>{ui.fileMeta.home.type}</span>
+            <span id="active-file-name">{ui.fileMeta.home.name}</span>
+            <span class="text-editor-dim/70">:</span>
+            <span id="active-file-path" class="text-editor-dim">{ui.fileMeta.home.path}</span>
+          </div>
+          <slot />
+        </main>
+      </div>
+    </div>
+
+    <StatusBar lang={lang} />
+  </div>
+
+  <div
+    id="mobile-sidebar-overlay"
+    class="fixed inset-0 z-30 bg-[#02070dcc] opacity-0 pointer-events-none transition-opacity duration-200 md:hidden"
+    data-sidebar-close
+    aria-hidden="true"
+  ></div>
+  <aside
+    id="mobile-sidebar"
+    class="fixed inset-y-0 left-0 z-40 -translate-x-full transition-transform duration-200 md:hidden shadow-[12px_0_32px_rgba(2,7,13,0.6)]"
+    aria-hidden="true"
+  >
+    <Sidebar lang={lang} mobile={true} />
+  </aside>
+
+  <IdeOverlays lang={lang} />
+
+  <script id="file-meta-data" type="application/json" set:html={JSON.stringify(ui.fileMeta)} />
+  <script>
+    import { initIde } from "../scripts/ide";
+    const fileMetaEl = document.getElementById("file-meta-data");
+    if (fileMetaEl) {
+      const fileMeta = JSON.parse(fileMetaEl.textContent ?? "{}");
+      initIde(fileMeta);
+    }
+  </script>
+</body>
+</html>

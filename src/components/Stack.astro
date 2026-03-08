@@ -1,0 +1,286 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale, SkillDomain, DomainMeta, EnrichedDomain, EnrichedTech, TechMeta } from "../data/types";
+import { domainMetaMap, techMetaMap } from "../data/content/shared";
+
+interface Props {
+  domains: SkillDomain[];
+  lang?: Locale;
+}
+
+const { domains, lang = Language.ES } = Astro.props;
+const copy = ContentStore.getUiCopy(lang).stack;
+
+const defaultDomainMeta: DomainMeta = {
+  label: "stack-block",
+  color: "#59d8ff",
+  accentClass: "from-[#123c57] to-[#10283f]",
+  iconName: "deployed_code",
+};
+
+const defaultTechMeta: TechMeta = {
+  type: "other",
+  fileType: ".json",
+  color: "#95a7c2",
+  iconSlug: "codeberg",
+  iconHex: "95a7c2",
+};
+
+function getDomainMeta(icon: string): DomainMeta {
+  return domainMetaMap[icon] || defaultDomainMeta;
+}
+
+function getTechMeta(tech: string): TechMeta {
+  return techMetaMap[tech] || defaultTechMeta;
+}
+
+function formatTechLines(techs: EnrichedTech[]): string[] {
+  const maxLineLength = 26;
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const tech of techs) {
+    const nextLine = currentLine ? `${currentLine}  ${tech.name}` : tech.name;
+
+    if (currentLine && nextLine.length > maxLineLength) {
+      lines.push(currentLine);
+      currentLine = tech.name;
+      continue;
+    }
+
+    currentLine = nextLine;
+  }
+
+  if (currentLine) lines.push(currentLine);
+
+  return lines;
+}
+
+function escapeHtml(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function highlightValue(value: string): string {
+  if (!value) return "";
+  if (value.startsWith("[") && value.endsWith("]")) {
+    const items = value
+      .slice(1, -1)
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => highlightValue(item))
+      .join('<span class="text-editor-variable">,</span> ');
+
+    return `<span class="text-editor-variable">[</span>${items}<span class="text-editor-variable">]</span>`;
+  }
+  if (value.startsWith('"') && value.endsWith('"')) return `<span class="text-neon-green">${value}</span>`;
+  if (value.startsWith(".")) return `<span class="text-neon-cyan">${value}</span>`;
+  return `<span class="text-editor-variable">${value}</span>`;
+}
+
+function highlightKey(key: string): string {
+  if (key === "id") return '<span class="text-neon-cyan">id</span>';
+  if (key === "name") return '<span class="text-neon-pink">name</span>';
+  if (key === "type") return '<span class="text-neon-purple">type</span>';
+  if (key === "file") return '<span class="text-neon-yellow">file</span>';
+  return `<span class="text-editor-type">${key}</span>`;
+}
+
+function highlightYaml(line: string): string {
+  const escaped = escapeHtml(line);
+
+  if (/^\s*-\s*$/.test(escaped)) return escaped;
+
+  const keyValueMatch = escaped.match(/^(\s*)([\w-]+):(.*)$/);
+  if (!keyValueMatch) {
+    const techLineMatch = line.match(/^(\s+)(\S.*)$/);
+    if (!techLineMatch) return escaped;
+
+    const [, indent, rawValue] = techLineMatch;
+    const highlightedValues = rawValue
+      .split(/\s{2,}/)
+      .map((value) => highlightValue(value))
+      .join("  ");
+
+    return `${indent}${highlightedValues}`;
+  }
+
+  const [, indent, key, rawValue] = keyValueMatch;
+  const value = rawValue.trimStart();
+
+  return `${indent}${highlightKey(key)}:${value ? ` ${highlightValue(value)}` : ""}`;
+}
+
+const enrichedDomains: EnrichedDomain[] = domains.map((domain) => {
+  const domainMeta = getDomainMeta(domain.icon);
+
+  return {
+    ...domainMeta,
+    id: domain.id,
+    title: domain.title,
+    techs: domain.skills.map((name) => ({ name, ...getTechMeta(name) })),
+  };
+});
+
+const totalTechs = enrichedDomains.reduce((count, domain) => count + domain.techs.length, 0);
+const maxDomainTechCount = Math.max(...enrichedDomains.map((domain) => domain.techs.length), 1);
+const previewCopy = copy.preview;
+
+const yamlLines: string[] = [
+  "stack:",
+  "  file: stack.yml",
+  "  schema: portfolio-tech/v2",
+  '  editor: "neon-workspace"',
+  "  groups:",
+];
+
+const addLines = 12;
+
+for (const domain of enrichedDomains) {
+  yamlLines.push("    ");
+  yamlLines.push(`      id: "${domain.id}"`);
+  yamlLines.push(`      name: "${domain.title}"`);
+  yamlLines.push(`      category: ${domain.label}`);
+  yamlLines.push("      technologies:");
+
+  for (const line of formatTechLines(domain.techs)) {
+    yamlLines.push(`        ${line}`);
+  }
+}
+
+const highlightedYamlLines = yamlLines.map((line) => highlightYaml(line));
+const lineNumbers = Array.from({ length: yamlLines.length + addLines }, (_, index) => index + 1);
+---
+
+<section id="stack" data-file-view class="border-t border-border">
+  <div class="p-6 lg:p-12">
+    <div class="mx-auto w-full max-w-6xl">
+      <div class="section-shell p-5 lg:p-7">
+        <div class="section-header" data-animate>
+          <div>
+            <div class="section-eyebrow mb-2">{copy.lead}</div>
+            <h2 class="text-3xl font-bold text-editor-text">{copy.title}</h2>
+            <p class="section-copy mt-3 max-w-3xl">{copy.description}</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="metric-pill"><strong>{enrichedDomains.length}</strong> {copy.groupsLabel}</span>
+            <span class="metric-pill"><strong>{totalTechs}</strong> {copy.techsLabel}</span>
+          </div>
+        </div>
+
+        <div class="grid overflow-hidden rounded-2xl border border-border bg-[#091424] shadow-[0_26px_60px_rgba(2,8,18,.34)] lg:grid-cols-[0.9fr_1.1fr]" data-animate data-delay="100">
+        <div class="border-b border-border bg-[linear-gradient(180deg,#0a1320_0%,#0a1626_100%)] lg:border-b-0 lg:border-r">
+          <div class="flex items-center justify-between border-b border-[#1a2b42] bg-[#0d1829] px-4 py-3">
+            <div>
+              <p class="text-[11px] uppercase tracking-[0.18em] text-editor-comment">{copy.yamlDefinition}</p>
+              <p class="mt-1 text-[10px] text-editor-dim">stack.yml</p>
+            </div>
+            <div class="rounded-full border border-[#24405d] bg-[#102139] px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-[#7ac7ff]">
+              {copy.liveSchema}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-[56px_1fr] font-mono text-[12px] leading-6">
+            <div class="select-none border-r border-[#16253a] bg-[#08101a] py-4 text-right text-editor-dim/70">
+              {lineNumbers.map((line) => (
+                <div class="pr-4">{line}</div>
+              ))}
+            </div>
+            <div class="overflow-hidden bg-[linear-gradient(180deg,#09121f_0%,#08111d_100%)] px-4 py-4">
+              <code class="block whitespace-pre-wrap break-words text-editor-text">
+                {highlightedYamlLines.map((line) => (
+                  <div class="hover:bg-white/[0.03]" set:html={line}></div>
+                ))}
+              </code>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative overflow-hidden bg-[radial-gradient(circle_at_top_right,_rgba(89,216,255,0.08),_transparent_30%),linear-gradient(180deg,_#0d1829_0%,_#0a1626_100%)]">
+          <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,transparent_22%)]"></div>
+
+          <div class="flex items-center justify-between border-b border-[#1a2b42] bg-[#0d1829] px-4 py-3">
+            <div>
+              <p class="text-[11px] uppercase tracking-[0.18em] text-editor-comment">{previewCopy.eyebrow}</p>
+              <p class="mt-1 text-[10px] text-editor-dim">{previewCopy.title}</p>
+            </div>
+            <div class="rounded-full border border-[#24405d] bg-[#102139] px-2.5 py-1 text-[10px] uppercase tracking-[0.12em] text-[#7ac7ff]">
+              {previewCopy.description}
+            </div>
+          </div>
+
+          <div class="relative p-4 lg:p-6">
+            <div class="grid auto-rows-fr gap-4 md:grid-cols-2">
+              {enrichedDomains.map((domain) => (
+                <article
+                  class="stack-domain-card group relative overflow-hidden rounded-xl border border-[#24405d] bg-[linear-gradient(180deg,rgba(14,29,48,0.94)_0%,rgba(10,22,38,0.92)_100%)] p-4 shadow-[0_16px_34px_rgba(3,12,24,0.24)] transition-transform duration-300 hover:-translate-y-0.5"
+                  style={`--domain-color: ${domain.color}; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 16px 34px rgba(3,12,24,0.24);`}
+                >
+                  <div
+                    class="absolute inset-0 opacity-60"
+                    style={`background:
+                      radial-gradient(circle at 100% 0%, ${domain.color}18 0%, transparent 32%),
+                      linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(5,9,16,0.03) 100%);`}
+                  ></div>
+                  <div class="absolute right-3 top-3 text-[32px] font-black leading-none text-white/[0.04]">
+                    {domain.id}
+                  </div>
+
+                  <div class="relative flex h-full flex-col">
+                    <header class="flex items-start justify-between gap-4">
+                      <div>
+                        <div class="inline-flex items-center rounded-md border px-2 py-1 text-[10px] uppercase tracking-[0.14em]" style={`color:${domain.color}; background:${domain.color}10; border-color:${domain.color}33;`}>
+                          {domain.label}
+                        </div>
+                        <h4 class="mt-3 text-base font-semibold text-editor-text">{domain.title}</h4>
+                        <p class="mt-2 text-[11px] uppercase tracking-[0.14em] text-editor-dim">
+                          {previewCopy.cluster} {domain.id} | {domain.techs.length} {copy.items}
+                        </p>
+                      </div>
+
+                      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#1f3854] bg-[#0b1c2f] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                        <span class="icon-symbol text-[21px] leading-none" style={`color:${domain.color};`} aria-hidden="true">{domain.iconName}</span>
+                      </div>
+                    </header>
+
+                    <div class="mt-5 flex flex-wrap gap-2.5">
+                      {domain.techs.map((tech) => (
+                        <div class="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[#1f3854] bg-[#081728]/45 px-3 py-2 text-editor-text">
+                          <img
+                            src={tech.iconUrl ?? `https://cdn.simpleicons.org/${tech.iconSlug}/${tech.iconHex}`}
+                            alt={`${tech.name} logo`}
+                            loading="lazy"
+                            decoding="async"
+                            class="h-[16px] w-[16px] shrink-0"
+                          />
+                          <span class="text-sm">{tech.name}</span>
+                          <span class="rounded-md border border-[#24405d] bg-[#0b1a2d] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-editor-comment">
+                            {tech.fileType}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div class="mt-auto pt-6">
+                      <div class="flex items-center gap-3">
+                        <div class="h-2 flex-1 overflow-hidden rounded-full bg-[#081728]">
+                          <div
+                            class="h-full rounded-full"
+                            style={`width:${Math.round((domain.techs.length / maxDomainTechCount) * 100)}%; background:${domain.color};`}
+                          ></div>
+                        </div>
+                        <div class="text-[10px] uppercase tracking-[0.14em] text-editor-dim">
+                          {previewCopy.coverage} {Math.round((domain.techs.length / maxDomainTechCount) * 100)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

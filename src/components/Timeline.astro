@@ -1,0 +1,113 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale, TimelineItem } from "../data/types";
+
+interface Props {
+  items: TimelineItem[];
+  lang?: Locale;
+}
+
+const { items, lang = Language.ES } = Astro.props;
+const copy = ContentStore.getUiCopy(lang).timeline;
+
+const timelineTypeStyles = {
+  experience: {
+    line: "from-neon-cyan/70 via-neon-cyan/35 to-transparent",
+    dotBorder: "border-neon-cyan/80",
+    dotBg: "bg-neon-cyan/20",
+    dotGlow: "shadow-[0_0_0_4px_rgba(89,216,255,0.08),0_0_16px_rgba(89,216,255,0.4)]",
+    cardBorder: "border-neon-cyan/25",
+    badge: "text-neon-cyan border-neon-cyan/30 bg-neon-cyan/10",
+    company: "text-neon-cyan",
+    glow: "radial-gradient(circle_at_top_right,rgba(89,216,255,0.14),transparent_34%)",
+    accent: "#59d8ff",
+  },
+  education: {
+    line: "from-neon-yellow/70 via-neon-yellow/30 to-transparent",
+    dotBorder: "border-neon-yellow/80",
+    dotBg: "bg-neon-yellow/20",
+    dotGlow: "shadow-[0_0_0_4px_rgba(255,211,107,0.08),0_0_16px_rgba(255,211,107,0.4)]",
+    cardBorder: "border-neon-yellow/25",
+    badge: "text-neon-yellow border-neon-yellow/30 bg-neon-yellow/10",
+    company: "text-neon-yellow",
+    glow: "radial-gradient(circle_at_top_right,rgba(255,211,107,0.14),transparent_34%)",
+    accent: "#ffd36b",
+  },
+} as const;
+---
+
+<section id="timeline" data-file-view class="border-t border-border">
+  <div class="p-6 lg:p-12">
+    <div class="mx-auto w-full max-w-6xl">
+      <div class="section-shell p-5 lg:p-7">
+        <div class="section-header" data-animate>
+          <div>
+            <div class="section-eyebrow mb-2">{copy.lead}</div>
+            <h2 class="text-3xl font-bold text-editor-text">{copy.title}</h2>
+            <p class="section-copy mt-3">{copy.description}</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="metric-pill"><strong>{items.length}</strong> {copy.commits}</span>
+            <span class="metric-pill"><strong>{copy.current}</strong> {copy.track}</span>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="absolute bottom-0 left-[88px] top-0 w-px bg-gradient-to-b from-neon-cyan/70 via-neon-purple/35 to-transparent"></div>
+          <div class="absolute bottom-0 left-[88px] top-0 w-[3px] -translate-x-px bg-[linear-gradient(180deg,rgba(89,216,255,0.12)_0%,rgba(159,147,255,0.08)_62%,transparent_100%)] blur-[2px]"></div>
+
+          <div class="space-y-8">
+            {items.map((item, i) => {
+              const style = timelineTypeStyles[item.type as keyof typeof timelineTypeStyles] || timelineTypeStyles.education;
+
+              return (
+                <div class="timeline-item-card flex gap-6" data-animate data-delay={i * 100 + ""}>
+                  <div class="w-20 shrink-0 pt-1">
+                    <div class="rounded-lg border border-border bg-bg-code/45 px-2 py-1.5 text-[10px] leading-tight text-editor-dim shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                      {item.period}
+                    </div>
+                    {item.isCurrent && (
+                      <span class="mt-2 inline-flex items-center gap-1 rounded-full border border-neon-green/30 bg-neon-green/10 px-2 py-0.5 text-[8px] uppercase tracking-[0.16em] text-neon-green shadow-[0_0_10px_rgba(103,247,191,0.14)]">
+                        <span class="h-1.5 w-1.5 rounded-full bg-neon-green shadow-[0_0_8px_rgba(103,247,191,0.65)]"></span>
+                        {copy.current}
+                      </span>
+                    )}
+                  </div>
+
+                  <div class="relative shrink-0 flex items-start pt-1.5">
+                    <div class={`absolute left-1/2 top-1.5 h-10 w-10 -translate-x-1/2 rounded-full bg-gradient-to-b ${style.line} opacity-50 blur-md`}></div>
+                    <div
+                      class={`h-3.5 w-3.5 rounded-full border-2 z-10 transition-all ${style.dotBorder} ${style.dotBg} ${style.dotGlow}
+                        ${item.isCurrent ? "animate-pulse" : ""}`}
+                    ></div>
+                  </div>
+
+                  <div class="flex-1 pb-6">
+                    <div
+                      class={`card-hover group relative overflow-hidden rounded-xl border bg-[linear-gradient(180deg,rgba(15,31,52,0.78)_0%,rgba(10,22,38,0.7)_100%)] p-4 shadow-[0_14px_34px_rgba(3,12,24,0.18)] ${style.cardBorder}`}
+                      style={`box-shadow: inset 0 1px 0 ${style.accent}22, 0 14px 34px rgba(3,12,24,0.18);`}
+                    >
+                      <div class="absolute inset-0 opacity-100" style={`background:${style.glow};`}></div>
+                      <div class="absolute inset-x-0 top-0 h-px" style={`background:linear-gradient(90deg, transparent, ${style.accent}66, transparent);`}></div>
+                      <div class="relative">
+                        <div class="mb-2 flex flex-wrap items-start justify-between gap-2">
+                          <h3 class="text-sm font-semibold text-editor-text">{item.title}</h3>
+                          <span class={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] ${style.badge}`}>
+                            {copy.typeLabels[item.type as keyof typeof copy.typeLabels] || item.type}
+                          </span>
+                        </div>
+                        <div class={`mb-3 text-xs ${style.company}`}>{item.company}</div>
+                        <div class="mb-3 h-px w-16" style={`background:linear-gradient(90deg, ${style.accent}, transparent);`}></div>
+                        <p class="text-xs leading-relaxed text-editor-dim">{item.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

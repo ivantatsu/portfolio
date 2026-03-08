@@ -1,0 +1,250 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale } from "../data/types";
+import InfraDiagram from "./InfraDiagram.astro";
+
+interface Props {
+  lang?: Locale;
+}
+
+const { lang = Language.ES } = Astro.props;
+const ui = ContentStore.getUiCopy(lang);
+---
+
+<div id="ide-closed-screen" class="ide-closed-screen scanlines" aria-hidden="true">
+  <div class="ide-closed-screen__inner">
+    <div class="ide-desktop__logo mb-1">IRB<span class="text-neon-cyan">_</span>Network</div>
+    <div class="ide-desktop__sub mb-10">// distributed · connected · always on</div>
+    <div class="ide-closed-screen__icon">
+      <span class="icon-symbol text-[40px] text-neon-cyan" aria-hidden="true">terminal</span>
+    </div>
+    <div class="flex flex-col items-center gap-5">
+      <div class="text-[10px] text-neon-cyan/60 tracking-[0.2em] uppercase font-bold">terminal</div>
+      <div class="ide-closed-screen__title">{ui.topbar.appTitle}</div>
+    </div>
+    <button id="ide-reopen-btn" class="ide-closed-screen__btn">
+      <span class="icon-symbol text-[16px]" aria-hidden="true">play_circle</span>
+      Open
+    </button>
+  </div>
+</div>
+
+
+<div id="ide-desktop" class="ide-desktop scanlines" aria-hidden="true">
+  <div class="ide-desktop__content">
+    <div class="ide-desktop__logo">IRB<span class="text-neon-cyan">_</span>Network</div>
+    <div class="ide-desktop__sub">// distributed · connected · always on</div>
+  </div>
+</div>
+
+
+<div id="ide-minimized-bar" class="ide-minimized-bar" aria-hidden="true">
+  <button id="ide-restore-btn" class="ide-minimized-bar__btn">
+    <span class="ide-minimized-bar__dot"></span>
+    <span class="icon-symbol text-[15px]" aria-hidden="true">terminal</span>
+    <span>portfolio_IRB</span>
+  </button>
+</div>
+
+
+<!-- Debug bar -->
+<div id="ide-debug-bar" class="ide-debug-bar" role="status" aria-live="polite" aria-hidden="true">
+  <div class="ide-debug-bar__head">
+    <span class="ide-debug-bar__pulse"></span>
+    <i class="fa-solid fa-bug text-[10px]" aria-hidden="true"></i>
+    <span class="ide-debug-bar__label">DEBUGGING</span>
+  </div>
+  <div class="ide-debug-bar__info">
+    <div class="ide-debug-bar__file">portfolio</div>
+    <div class="ide-debug-bar__bp">● breakpoint active</div>
+  </div>
+  <button id="ide-debug-stop" class="ide-debug-bar__stop" aria-label="Stop debugging">
+    <span class="icon-symbol text-[12px]" aria-hidden="true">stop_circle</span>
+    Stop Debug
+  </button>
+</div>
+
+
+<!-- Selection banner -->
+<div id="ide-selection-banner" class="ide-selection-banner" aria-hidden="true">
+  <span class="icon-symbol text-[13px] text-neon-cyan" aria-hidden="true">select_all</span>
+  <span class="ide-selection-banner__text">
+    <span id="ide-selection-count">0</span> {lang === "en" ? "items selected" : "elementos seleccionados"}
+  </span>
+  <kbd class="ide-selection-banner__kbd">Esc</kbd>
+  <button id="ide-deselect-btn" class="ide-selection-banner__btn" aria-label={lang === "en" ? "Deselect all" : "Deseleccionar todo"}>
+    <span class="icon-symbol text-[12px]" aria-hidden="true">close</span>
+  </button>
+</div>
+
+
+<!-- Modals -->
+<div id="ide-about" class="ide-overlay-backdrop" aria-hidden="true">
+  <div class="ide-dialog" role="dialog" aria-labelledby="ide-about-title">
+    <div class="ide-dialog__header">
+      <div class="flex items-center gap-2">
+        <span class="icon-symbol text-[13px] text-neon-cyan/60" aria-hidden="true">info</span>
+        <span class="ide-dialog__title" id="ide-about-title">
+          {lang === 'en' ? 'About IRB IDE' : 'Acerca de IRB IDE'}
+        </span>
+      </div>
+      <button class="ide-dialog__close" data-close-dialog="ide-about" aria-label="Cerrar">
+        <span class="icon-symbol text-[14px]" aria-hidden="true">close</span>
+      </button>
+    </div>
+    <div class="ide-dialog__body">
+      <div class="ide-about-hero">
+        <div class="ide-about-hero__icon">
+          <span class="icon-symbol text-[28px] text-neon-cyan" aria-hidden="true">terminal</span>
+        </div>
+        <div>
+          <div class="ide-about-hero__name">IRB<span class="text-neon-cyan">_</span>Network</div>
+          <div class="ide-about-hero__sub">portfolio — IDE Edition</div>
+        </div>
+      </div>
+      <table class="ide-dialog__table">
+        <tbody>
+          <tr>
+            <td class="ide-dialog__key">{lang === 'en' ? 'Version' : 'Versión'}</td>
+            <td class="ide-dialog__val">2.0.0</td>
+          </tr>
+          <tr>
+            <td class="ide-dialog__key">{lang === 'en' ? 'Engine' : 'Motor'}</td>
+            <td class="ide-dialog__val"><span style="color:#ff5d01">Astro</span> v5</td>
+          </tr>
+          <tr>
+            <td class="ide-dialog__key">{lang === 'en' ? 'Language' : 'Lenguaje'}</td>
+            <td class="ide-dialog__val"><span style="color:#3178c6">TypeScript</span></td>
+          </tr>
+          <tr>
+            <td class="ide-dialog__key">{lang === 'en' ? 'Styling' : 'Estilos'}</td>
+            <td class="ide-dialog__val"><span style="color:#38bdf8">Tailwind CSS</span> v4</td>
+          </tr>
+          <tr>
+            <td class="ide-dialog__key">{lang === 'en' ? 'License' : 'Licencia'}</td>
+            <td class="ide-dialog__val">MIT</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="ide-dialog__footer ide-about-footer">
+        <div class="ide-about-dev">
+          <span class="ide-about-dev__label">// dev</span>
+          <span>Ivan Ramon Bolsa</span>
+        </div>
+        <div class="ide-about-links">
+          <a href="https://github.com/ivantatsu" class="ide-about-link" target="_blank" rel="noopener noreferrer">
+            <i class="fa-brands fa-github" aria-hidden="true"></i> GitHub
+          </a>
+          <span class="ide-about-links__sep" aria-hidden="true">·</span>
+          <a href="https://linkedin.com/in/ivanramon" class="ide-about-link" target="_blank" rel="noopener noreferrer">
+            <i class="fa-brands fa-linkedin" aria-hidden="true"></i> LinkedIn
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ide-shortcuts" class="ide-overlay-backdrop" aria-hidden="true">
+  <div class="ide-dialog ide-dialog--wide" role="dialog" aria-labelledby="ide-shortcuts-title">
+    <div class="ide-dialog__header">
+      <div class="flex items-center gap-2">
+        <span class="icon-symbol text-[13px] text-neon-cyan/60" aria-hidden="true">keyboard</span>
+        <span class="ide-dialog__title" id="ide-shortcuts-title">
+          {lang === 'en' ? 'Keyboard Shortcuts' : 'Atajos de Teclado'}
+        </span>
+      </div>
+      <button class="ide-dialog__close" data-close-dialog="ide-shortcuts" aria-label="Cerrar">
+        <span class="icon-symbol text-[14px]" aria-hidden="true">close</span>
+      </button>
+    </div>
+    <div class="ide-dialog__body">
+      <div class="ide-shortcuts-grid">
+        <!-- Left column -->
+        <div class="ide-shortcuts-col">
+          <div class="ide-shortcuts-group">
+            <div class="ide-shortcuts-cat">{lang === 'en' ? 'File' : 'Archivo'}</div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Save' : 'Guardar'}</span><kbd>Ctrl+S</kbd></div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Close IDE' : 'Cerrar IDE'}</span><kbd>Ctrl+W</kbd></div>
+          </div>
+          <div class="ide-shortcuts-group">
+            <div class="ide-shortcuts-cat">{lang === 'en' ? 'Editor' : 'Editor'}</div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Undo' : 'Deshacer'}</span><kbd>Ctrl+Z</kbd></div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Redo' : 'Rehacer'}</span><kbd>Ctrl+Y</kbd></div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Select All' : 'Seleccionar todo'}</span><kbd>Ctrl+A</kbd></div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Deselect' : 'Deseleccionar'}</span><kbd>Esc</kbd></div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Find in file' : 'Buscar en archivo'}</span><kbd>Ctrl+F</kbd></div>
+          </div>
+        </div>
+        <!-- Right column -->
+        <div class="ide-shortcuts-col">
+          <div class="ide-shortcuts-group">
+            <div class="ide-shortcuts-cat">{lang === 'en' ? 'View' : 'Vista'}</div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Explorer' : 'Explorador'}</span><kbd>Ctrl+B</kbd></div>
+            <div class="ide-shortcut-row"><span>Terminal</span><kbd>Ctrl+`</kbd></div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Full Screen' : 'Pantalla completa'}</span><kbd>F11</kbd></div>
+          </div>
+          <div class="ide-shortcuts-group">
+            <div class="ide-shortcuts-cat">Debug</div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Start Debugging' : 'Iniciar debug'}</span><kbd>F5</kbd></div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Stop Debugging' : 'Detener debug'}</span><kbd>Shift+F5</kbd></div>
+          </div>
+          <div class="ide-shortcuts-group">
+            <div class="ide-shortcuts-cat">{lang === 'en' ? 'Help' : 'Ayuda'}</div>
+            <div class="ide-shortcut-row"><span>{lang === 'en' ? 'Keyboard Shortcuts' : 'Atajos de teclado'}</span><kbd>Ctrl+K Ctrl+S</kbd></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ide-infra" class="ide-overlay-backdrop" aria-hidden="true">
+  <div class="ide-dialog ide-dialog--wide" role="dialog" aria-labelledby="ide-infra-title">
+    <div class="ide-dialog__header">
+      <div class="flex items-center gap-2">
+        <span class="icon-symbol text-[13px] text-neon-cyan/60" aria-hidden="true">schema</span>
+        <span class="ide-dialog__title" id="ide-infra-title">
+          {lang === 'en' ? 'System Architecture' : 'Arquitectura del Sistema'}
+        </span>
+      </div>
+      <button class="ide-dialog__close" data-close-dialog="ide-infra" aria-label="Cerrar">
+        <span class="icon-symbol text-[14px]" aria-hidden="true">close</span>
+      </button>
+    </div>
+    <div class="ide-dialog__body !p-0 overflow-hidden">
+      <div class="p-6 bg-[#081728]/50 border-b border-border">
+         <h3 class="text-neon-cyan font-bold mb-2">{lang === 'en' ? 'Home Lab Infrastructure' : 'Infraestructura Home Lab'}</h3>
+         <p class="text-xs text-editor-dim leading-relaxed max-w-2xl">
+           {lang === 'en' 
+             ? 'Visual representation of my self-managed environment. It uses Traefik as a gateway, WireGuard for internal security, and GitLab for the full development lifecycle.' 
+             : 'Representación visual de mi entorno auto-gestionado. Utiliza Traefik como puerta de enlace, WireGuard para seguridad interna y GitLab para el ciclo de vida completo del desarrollo.'}
+         </p>
+      </div>
+      <div class="overflow-auto max-h-[60vh] bg-sidebar/30">
+        <InfraDiagram labels={ui.infraDiagram} />
+      </div>
+      <div class="p-4 border-t border-border flex justify-end gap-3 bg-[#081728]/30">
+        <div class="flex items-center gap-4 text-[10px] text-editor-comment uppercase tracking-widest mr-auto pl-2">
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-neon-cyan"></span> Public</span>
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-neon-pink"></span> VPN Only</span>
+        </div>
+        <button class="px-4 py-1.5 rounded bg-white/5 border border-border text-xs hover:bg-white/10 transition-colors" data-close-dialog="ide-infra">
+          {lang === 'en' ? 'Close' : 'Cerrar'}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ide-find-bar" class="ide-find-bar" hidden>
+  <span class="icon-symbol text-[14px] text-editor-dim">search</span>
+  <input id="ide-find-input" type="text" class="ide-find-bar__input" placeholder="Buscar..." />
+  <span id="ide-find-count" class="ide-find-bar__count"></span>
+  <button id="ide-find-close" class="ide-find-bar__close">×</button>
+</div>
+
+<script>
+  import { initOverlays } from "../scripts/overlays";
+  initOverlays();
+</script>

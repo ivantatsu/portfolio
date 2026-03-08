@@ -1,0 +1,85 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale, PersonalInfo } from "../data/types";
+
+interface Props {
+  personal: PersonalInfo;
+  lang?: Locale;
+}
+
+const { personal, lang = Language.ES } = Astro.props;
+const copy = ContentStore.getUiCopy(lang).contact;
+---
+
+<section id="contact" data-file-view class="border-t border-border">
+  <div class="p-6 lg:p-12">
+    <div class="mx-auto w-full max-w-6xl">
+      <div class="section-shell p-5 lg:p-7">
+        <div class="section-header" data-animate>
+          <div>
+            <div class="section-eyebrow mb-2">{copy.lead}</div>
+            <h2 class="text-3xl font-bold text-editor-text">{copy.title}</h2>
+            <p class="section-copy mt-3 leading-relaxed">{copy.description}</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="metric-pill"><strong>{copy.fileLabel}</strong></span>
+            <span class="metric-pill"><strong>{copy.ready}</strong></span>
+          </div>
+        </div>
+
+      <div class="window-panel" data-animate data-delay="200">
+        <div class="window-titlebar">
+          <div class="window-controls">
+            <div class="window-control window-control--red"></div>
+            <div class="window-control window-control--yellow"></div>
+            <div class="window-control window-control--green"></div>
+          </div>
+          <span class="text-xs text-editor-dim ml-2">{copy.fileLabel}</span>
+        </div>
+
+        <div class="p-6 font-mono text-sm space-y-3">
+          <div>
+            <span class="text-neon-green">$</span>
+            <span class="text-editor-dim ml-2">{copy.initCommand}</span>
+          </div>
+          <div class="text-editor-comment text-xs"># {copy.connecting} {personal.name}...</div>
+
+          <div class="contact-link-row text-editor-text"><span class="text-neon-cyan">{copy.labels.email}:</span><a href={"mailto:" + personal.email}>{personal.email}</a></div>
+          <div class="contact-link-row text-editor-text"><span class="text-neon-cyan">{copy.labels.github}:</span><a href={personal.github} target="_blank" rel="noopener noreferrer">{personal.github.replace("https://", "")}</a></div>
+          <div class="contact-link-row text-editor-text"><span class="text-neon-cyan">{copy.labels.linkedin}:</span><a href={personal.linkedin} target="_blank" rel="noopener noreferrer">{personal.linkedin.replace("https://", "")}</a></div>
+          {personal.twitter && (
+            <div class="contact-link-row text-editor-text"><span class="text-neon-cyan">{copy.labels.twitter}:</span><a href={personal.twitter} target="_blank" rel="noopener noreferrer">{personal.twitter.replace("https://", "")}</a></div>
+          )}
+          <div class="flex items-center gap-2 pt-2">
+            <span class="text-neon-green">$</span>
+            <span class="text-editor-dim">{copy.status}:</span>
+            <span class="text-neon-green flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" style="box-shadow: 0 0 6px #39ff14;"></span>
+              {copy.ready}
+            </span>
+            <span class="animate-blink text-neon-cyan">|</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 flex flex-wrap gap-3" data-animate data-delay="400">
+        <a href={"mailto:" + personal.email} class="btn-neon action-btn action-btn--green">
+          <span class="icon-symbol text-[18px]" aria-hidden="true">send</span>
+          {copy.send}
+        </a>
+        <a href={personal.linkedin} target="_blank" rel="noopener noreferrer" class="btn-neon action-btn action-btn--muted action-btn--muted-cyan">
+          <i class="fa-brands fa-linkedin-in text-[14px]" aria-hidden="true"></i>
+          {copy.linkedin}
+        </a>
+      </div>
+
+      <div class="mt-12 border-t border-border pt-6 text-xs text-editor-dim" data-animate data-delay="600">
+        <div class="flex flex-wrap justify-between gap-4">
+          <span>{copy.footer}</span>
+          <span>{personal.name} @{new Date().getFullYear()}</span>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</section>

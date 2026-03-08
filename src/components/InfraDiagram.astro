@@ -1,0 +1,98 @@
+---
+import type { UiCopy } from "../data/types";
+
+interface Props {
+  labels: UiCopy["infraDiagram"];
+}
+
+const { labels } = Astro.props;
+---
+
+<div class="infra-diagram-container text-editor-dim">
+  <div class="infra-grid">
+    <div class="infra-row public-zone">
+      <div class="infra-node internet">
+        <span class="icon-symbol">public</span>
+        <span>{labels.internet}</span>
+      </div>
+    </div>
+
+    <div class="infra-arrow">
+      <div class="arrow-down"></div>
+    </div>
+
+    <div class="infra-row dmz-zone">
+      <div class="infra-node traefik">
+        <div class="node-tag node-tag--yellow">{labels.edgeProxy}</div>
+        <span class="icon-symbol text-neon-yellow">router</span>
+        <span>{labels.traefik}</span>
+        <div class="node-meta">{labels.sslRouting}</div>
+      </div>
+    </div>
+
+    <div class="infra-arrow">
+      <div class="arrow-down"></div>
+    </div>
+
+    <div class="infra-row docker-layer">
+      <div class="infra-node docker">
+        <div class="node-tag">{labels.runtime}</div>
+        <span class="icon-symbol text-neon-cyan">terminal</span>
+        <span>{labels.docker}</span>
+        <div class="node-meta">{labels.containerOrchestration}</div>
+      </div>
+    </div>
+
+    <div class="infra-arrow">
+      <div class="arrow-down"></div>
+    </div>
+
+    <div class="infra-arrows-split">
+      <div class="split-connector"></div>
+    </div>
+
+    <div class="infra-row split-zones">
+      <div class="infra-zone public-apps">
+        <div class="zone-label">{labels.publicApps}</div>
+        <div class="infra-node-group">
+          <div class="infra-node-small mb-2">{labels.portfolio}</div>
+          <div class="infra-node-small mb-2">{labels.miniPaas}</div>
+          <div class="infra-node-small">{labels.others}</div>
+        </div>
+      </div>
+
+      <div class="infra-zone private-vpn">
+        <div class="zone-label flex items-center gap-2">
+          <span class="icon-symbol text-[10px]">lock</span>
+          {labels.wireguardVpn}
+        </div>
+
+        <div class="infra-node-group flex flex-col items-center">
+          <div class="infra-node gitlab">
+            <span class="icon-symbol text-neon-pink">account_tree</span>
+            <span>{labels.gitlab}</span>
+            <div class="node-meta">{labels.gitlabInternal}</div>
+          </div>
+
+          <div class="mirror-vertical-connection">
+            <div class="mirror-line"></div>
+            <div class="mirror-label">{labels.mirrorSync}</div>
+            <div class="mirror-arrow"></div>
+          </div>
+
+          <div class="infra-node github-node-mini">
+            <span class="icon-symbol text-neon-purple !text-[14px]">cloud_done</span>
+            <span class="font-bold text-[10px]">{labels.github}</span>
+          </div>
+
+          <div class="infra-node-small mt-2 w-full">{labels.gitlabRunners}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="infra-base mt-6">
+      <div class="base-label">{labels.baseOs}</div>
+    </div>
+  </div>
+</div>
+

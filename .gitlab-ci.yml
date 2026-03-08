@@ -1,0 +1,56 @@
+stages:
+  - build
+  - deploy
+  - mirror
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+# ---------- JOB 1: BUILD ----------
+build:
+  stage: build
+  image: docker:latest
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+
+# ---------- JOB 2: DEPLOY ----------
+deploy:
+  stage: deploy
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - cd /srv/portfolio
+    - docker compose down
+    - docker compose pull
+    - docker compose up -d
+  only:
+    - main
+
+# ---------- JOB 3: MIRROR ----------
+mirror-to-github:
+  stage: mirror
+  rules:
+    - if: $CI_COMMIT_TAG 
+  script:
+    - git config --global user.email $GITHUB_EMAIL
+    - git config --global user.name $GITHUB_USERNAME
+    - git clone --depth 1 --branch $CI_COMMIT_TAG $CI_REPOSITORY_URL repo
+    - cd repo
+    - git remote add github $GITHUB_URI
+    - git fetch github || true
+    - |
+      if git ls-remote --exit-code github main; then
+        git checkout -b main github/main
+      else
+        git checkout --orphan main
+        git rm -rf . > /dev/null 2>&1
+      fi
+    - git checkout $CI_COMMIT_TAG -- .
+    - git add .
+    - git commit -m "Release $CI_COMMIT_TAG"
+    - git tag -f -a $CI_COMMIT_TAG HEAD -m "$CI_COMMIT_TAG_MESSAGE"
+    - git push github main
+    - git push github $CI_COMMIT_TAG

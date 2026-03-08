@@ -1,0 +1,170 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale, Project } from "../data/types";
+import { techColorMap, statusConfig } from "../data/content/shared";
+
+interface Props {
+  projects: Project[];
+  lang?: Locale;
+}
+
+const { projects, lang = Language.ES } = Astro.props;
+const copy = ContentStore.getUiCopy(lang).projects;
+
+function getTechColor(tech: string) {
+  return techColorMap[tech.toLowerCase()] || "#95a7c2";
+}
+---
+
+<section id="projects" data-file-view class="border-t border-border">
+  <div class="p-4 lg:p-8">
+    <div class="mx-auto w-full max-w-6xl">
+      <div class="section-shell p-5 lg:p-7">
+        <div class="section-header" data-animate>
+          <div>
+            <div class="section-eyebrow mb-1">{copy.lead}</div>
+            <h2 class="text-2xl font-bold text-editor-text lg:text-3xl">{copy.title}</h2>
+            <p class="section-copy mt-2 text-xs lg:text-sm">{copy.description}</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="metric-pill"><strong>{projects.length}</strong> {copy.rows}</span>
+            <span class="metric-pill"><strong>{copy.fileLabel}</strong></span>
+          </div>
+        </div>
+
+        <div class="window-panel">
+          <div class="grid grid-cols-[34px_1fr] text-xs">
+            <div class="select-none border-r border-border py-3 pr-2 text-right leading-7 text-[#45668c]">1<br/>2<br/>3<br/>4<br/>5<br/>6</div>
+            <div class="py-3 pl-3 pr-3 leading-7">
+              <div class="text-editor-comment">-- {copy.queryComment}</div>
+              <div><span class="text-editor-keyword">SELECT</span> <span class="text-editor-variable">*</span></div>
+              <div><span class="text-editor-keyword">FROM</span> <span class="text-editor-string">projects</span></div>
+              <div><span class="text-editor-keyword">WHERE <span class="text-editor-variable">status</span> NOT LIKE</span> <span class="text-editor-string">'archived'</span></div>
+              <div><span class="text-editor-keyword">ORDER BY</span> <span class="text-editor-variable">impact</span> <span class="text-editor-keyword">DESC</span>;</div>
+              <div class="text-[#589f5d]">-- {projects.length} {copy.rowsReturned}.</div>
+            </div>
+          </div>
+        </div>
+        <div class="project-query-ok">
+          <div class="project-query-ok__text">{copy.querySuccess} {projects.length} {copy.rowsReturned}.</div>
+        </div>
+
+        <div class="pb-2 pt-6">
+          <div class="mb-3 text-xs text-neon-yellow">{"{"}</div>
+          <div class="pl-4">
+            <div class="mb-3 text-xs text-neon-cyan">"projects": [</div>
+          </div>
+          <div class="grid grid-cols-1 gap-4 pl-4 lg:pl-6 xl:grid-cols-2">
+            {projects.map((project, i) => {
+              const key = (project.status as keyof typeof statusConfig) || "concept";
+              const status = statusConfig[key] || statusConfig.concept;
+              const label = copy.labels[key] || copy.labels.concept;
+              return (
+                <article class="project-json-card card-hover group relative overflow-hidden rounded-xl" data-animate data-delay={i * 100 + ""}>
+                  <div class="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-neon-cyan/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
+                  <div class="relative z-10">
+                    <div class="mb-4">
+                      <div class="mb-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-editor-comment">
+                          <span class="text-neon-pink">{copy.row}</span>
+                          <span>{String(i + 1).padStart(2, "0")}</span>
+                          <span class="h-1 w-1 rounded-full bg-white/20"></span>
+                          <span class="text-neon-cyan">{project.id}</span>
+                        </div>
+                        <span class={`flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${status.color} ${status.bg} ${status.border}`}>
+                          <span class="h-1 w-1 rounded-full animate-pulse" style={`background: ${status.dot}; box-shadow: 0 0 4px ${status.dot};`}></span>
+                          {label}
+                        </span>
+                      </div>
+
+                      <div class="rounded-lg bg-[#081728]/35 px-3 py-2 text-[11px] leading-6">
+                        <div>{"{"}</div>
+                        <div class="space-y-1 pl-4">
+                          <div>
+                            <span class="text-editor-keyword">"title"</span>:{" "}
+                            <span class="text-[1.05rem] font-semibold tracking-[0.01em] text-editor-text">"{project.title}"</span>,
+                          </div>
+                          <div>
+                            <span class="text-editor-keyword">"description"</span>: <span class="text-editor-comment">"{project.description}"</span>,
+                          </div>
+                          <div>
+                            <span class="text-editor-keyword">"link"</span>: <span class="text-editor-string">"{project.github || project.demo || "#"}"</span>
+                          </div>
+                        </div>
+                        <div>{"}"},</div>
+                      </div>
+                    </div>
+
+                    <div class="space-y-4 pl-3">
+                      <div>
+                        <div class="mb-2 text-[10px] uppercase tracking-[0.12em] text-editor-comment">{copy.techStack}</div>
+                        <div class="flex flex-wrap gap-1.5">
+                          {project.techs.map((tech) => (
+                            <span class="rounded-md px-2 py-0.5 text-[10px]" style={`color: ${getTechColor(tech)}; background: ${getTechColor(tech)}12; box-shadow: inset 0 0 0 1px ${getTechColor(tech)}33;`}>
+                              "{tech}"
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div class="mb-2 text-[10px] uppercase tracking-[0.12em] text-editor-comment">{copy.highlights}</div>
+                        <ul class="space-y-1.5 text-[11px] text-editor-dim">
+                          {project.highlights.slice(0, 3).map((highlight) => (
+                            <li class="flex items-start gap-2">
+                              <span class="mt-[5px] h-1 w-1 rounded-full bg-neon-cyan"></span>
+                              <span>{highlight}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div class="flex flex-wrap gap-3 pt-2">
+                        {project.github && (
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn-neon action-btn action-btn--compact action-btn--cyan"
+                          >
+                            <span class="action-btn__tag">&lt;/&gt;</span>
+                            <span>{copy.repo}</span>
+                          </a>
+                        )}
+                        {project.demo && (
+                          <a
+                            href={project.demo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn-neon action-btn action-btn--compact action-btn--pink"
+                          >
+                            <span class="action-btn__tag">RUN</span>
+                            <span>{copy.demo}</span>
+                          </a>
+                        )}
+                        {project.diagram && (
+                          <button
+                            data-open-dialog={`ide-${project.diagram.replace("infra-diagram", "infra")}`}
+                            class="btn-neon action-btn action-btn--compact action-btn--cyan"
+                            title={copy.architecture}
+                          >
+                            <span class="action-btn__tag !px-1.5 !py-0.5">
+                               <i class="icon-symbol !text-[14px]">account_tree</i>
+                            </span>
+                            <span>{copy.architecture}</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+          <div class="mt-3 pl-4 text-xs text-neon-cyan">],</div>
+          <div class="text-xs text-neon-yellow">{"}"}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

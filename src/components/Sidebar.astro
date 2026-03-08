@@ -1,0 +1,93 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale, ExplorerNode } from "../data/types";
+import ExplorerTreeNode from "./ExplorerTreeNode.astro";
+import { explorerItems } from "../data/content/shared";
+
+interface Props {
+  lang?: Locale;
+  mobile?: boolean;
+}
+
+const { lang = Language.ES, mobile = false } = Astro.props;
+const ui = ContentStore.getUiCopy(lang);
+const fileCount = explorerItems.filter((item) => item.kind === "file").length;
+const childrenByParent = new Map<string | undefined, typeof explorerItems>();
+
+for (const item of explorerItems) {
+  const siblings = childrenByParent.get(item.parentId) || [];
+  siblings.push(item);
+  childrenByParent.set(item.parentId, siblings);
+}
+
+function buildTree(parentId?: string): ExplorerNode[] {
+  return (childrenByParent.get(parentId) || []).map((item) => ({
+    ...item,
+    children: buildTree(item.id),
+  }));
+}
+
+const explorerTree = buildTree();
+---
+
+<aside
+  class:list={[
+    "bg-sidebar border-r border-border flex-col shrink-0 overflow-y-auto",
+    mobile ? "flex w-[85vw] max-w-xs h-full" : "hidden md:flex w-52 lg:w-60",
+  ]}
+  data-desktop-sidebar={!mobile ? "true" : undefined}
+>
+  <div class="sidebar-header">
+    <div class="flex items-center gap-2">
+      <span>{ui.sidebar.explorerTitle}</span>
+      <span class="sidebar-count">{fileCount}</span>
+    </div>
+    {mobile && (
+      <button
+        type="button"
+        data-sidebar-close
+        aria-label={ui.sidebar.closeExplorer}
+        class="sidebar-close-btn md:hidden"
+      >
+        x
+      </button>
+    )}
+  </div>
+
+  <div class="sidebar-location">
+    <div class="sidebar-location__pill" data-sidebar-location>
+      PORTFOLIO/src
+    </div>
+  </div>
+
+  <div class="sidebar-tree" data-explorer-tree>
+    {explorerTree.map((node) => (
+      <ExplorerTreeNode node={node} />
+    ))}
+  </div>
+
+  <div class="sidebar-terminal">
+    <div class="mb-2 flex items-center justify-between">
+      <div class="text-[10px] text-editor-dim">{ui.sidebar.terminalTitle}</div>
+      <div class="sidebar-running-pill">
+        {ui.sidebar.running}
+      </div>
+    </div>
+    <div class="sidebar-terminal-panel space-y-2" data-terminal-log-lines={ui.sidebar.logs.join("|")}>
+      <div>
+        <span class="text-neon-green">dev</span>
+        <span class="text-editor-dim">:~</span>
+        <span class="text-editor-dim"> $ </span>
+        <span class="text-neon-cyan cursor">_</span>
+      </div>
+      <div class="text-[10px] text-editor-comment">{ui.sidebar.installCmd}</div>
+      <div class="text-[10px] text-editor-dim">
+        {ui.sidebar.loadingLabel}<span class="terminal-dots text-neon-cyan"></span>
+      </div>
+      <div class="h-1.5 overflow-hidden rounded-full border border-border bg-[#07111d]">
+        <div class="terminal-loop-bar h-full bg-gradient-to-r from-neon-cyan/70 to-neon-cyan"></div>
+      </div>
+      <div class="terminal-log text-[10px] text-neon-green">{ui.sidebar.logs[0]}</div>
+    </div>
+  </div>
+</aside>

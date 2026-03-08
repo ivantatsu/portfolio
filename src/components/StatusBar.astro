@@ -1,0 +1,34 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale } from "../data/types";
+
+interface Props {
+  lang?: Locale;
+}
+
+const { lang = Language.ES } = Astro.props;
+const copy = ContentStore.getUiCopy(lang).statusBar;
+---
+
+<div class="flex h-8 shrink-0 items-center justify-between border-t border-[#335f8d] bg-[linear-gradient(180deg,#144273_0%,#123660_100%)] px-3">
+  <div class="flex items-center gap-4 text-[11px] text-white">
+    <span class="flex items-center gap-1">
+      <span class="icon-symbol text-[14px]" aria-hidden="true">account_tree</span>
+      {copy.branch}
+    </span>
+    <span>{copy.framework}</span>
+    <span>{copy.language}</span>
+    <span class="hidden rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] md:inline-flex">{copy.ide}</span>
+  </div>
+
+  <div class="hidden items-center gap-4 text-[11px] text-white sm:flex">
+    <span>{copy.theme}</span>
+    <span>{copy.encoding}</span>
+    <span>{copy.lineColumn}</span>
+    <span class="flex items-center gap-1">
+      <span class="w-2 h-2 rounded-full bg-[#67f7bf] animate-pulse"></span>
+      {copy.ready}
+    </span>
+  </div>
+</div>
+

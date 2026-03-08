@@ -1,0 +1,114 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale } from "../data/types";
+
+interface Props {
+  lang?: Locale;
+}
+
+const { lang = Language.ES } = Astro.props;
+const ui = ContentStore.getUiCopy(lang);
+const switchHref = "/" + (lang === Language.EN ? Language.ES : Language.EN) + "/";
+const switchLabel = lang === Language.EN ? Language.ES.toUpperCase() : Language.EN.toUpperCase();
+---
+
+<div class="relative z-50 bg-bg-panel/90 border-b border-border select-none backdrop-blur-sm">
+  <div class="md:hidden">
+    <div class="topbar-mobile-bar">
+      <span class="block text-[11px] text-editor-dim truncate">{ui.topbar.appTitle}</span>
+    </div>
+    <div class="h-9 flex items-center justify-between px-3">
+      <button
+        type="button"
+        class="topbar-mobile-toggle"
+        data-sidebar-toggle
+        aria-label={ui.topbar.openExplorer}
+      >
+        <span class="icon-symbol text-[18px]" aria-hidden="true">menu</span>
+        <span>{ui.topbar.explorerButton}</span>
+      </button>
+      <a href={switchHref} class="lang-switch h-6" aria-label={ui.topbar.langLabel} title={ui.topbar.langLabel}>
+        <span class="lang-switch__label">{ui.topbar.langLabel}</span>
+        <span class="lang-switch__value">{switchLabel}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="relative hidden md:flex items-center h-8">
+    <div class="topbar-controls flex items-center gap-1 px-3">
+      <button class="topbar-window-control bg-[#ff5f57]" data-action="close-ide" aria-label="Close IDE"><span class="wc-icon">×</span></button>
+      <button class="topbar-window-control bg-[#febc2e]" data-action="minimize-ide" aria-label="Minimize IDE"><span class="wc-icon">−</span></button>
+      <button class="topbar-window-control bg-[#28c840]" data-action="maximize-fullscreen" aria-label="Fullscreen"><span class="wc-icon">+</span></button>
+    </div>
+
+    <nav class="flex items-center gap-0 ml-2" id="topbar-menu">
+      {ui.topbar.menuItems.map((item, i) => (
+        <div class="topbar-menu-item" data-menu-index={i}>
+          <button
+            class="topbar-menu-btn"
+            data-action={!item.items ? (item.action ?? "") : ""}
+            data-menu-trigger={item.items ? String(i) : undefined}
+            aria-haspopup={item.items ? "true" : undefined}
+            aria-expanded="false"
+          >
+            {item.label}
+          </button>
+          {item.items && (
+            <div class="topbar-dropdown" data-menu-dropdown={i} role="menu">
+              {item.items.map((sub) =>
+                sub.separator ? (
+                  <div class="topbar-dropdown__sep" role="separator"></div>
+                ) : (
+                  <button
+                    class="topbar-dropdown__item"
+                    data-menu-action={sub.action ?? ""}
+                    role="menuitem"
+                  >
+                    <span>{sub.label}</span>
+                    {sub.shortcut && <span class="topbar-dropdown__shortcut">{sub.shortcut}</span>}
+                  </button>
+                )
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </nav>
+
+    <div class="pointer-events-none absolute inset-x-0 flex justify-center px-3">
+      <span class="text-xs text-editor-dim truncate">{ui.topbar.appTitle}</span>
+    </div>
+
+    <div class="ml-auto flex items-center gap-3 px-3">
+      <a
+        href={switchHref}
+        class="lang-switch"
+        aria-label={ui.topbar.langLabel}
+        title={ui.topbar.langLabel}
+        data-lang-switch
+        data-switch-href={switchHref}
+      >
+        <span class="lang-switch__label">{ui.topbar.langLabel}</span>
+        <span class="lang-switch__value">{switchLabel}</span>
+      </a>
+      <span class="text-xs text-neon-cyan font-mono hidden sm:block">{ui.topbar.themeLabel}</span>
+    </div>
+  </div>
+</div>
+
+<script id="toast-labels-data" type="application/json" set:html={JSON.stringify(ui.toast)} />
+<script>
+  import { initTopBar } from "../scripts/topbar";
+  const toastLabelsEl = document.getElementById("toast-labels-data");
+  if (toastLabelsEl) {
+    const toastLabels = JSON.parse(toastLabelsEl.textContent ?? "{}");
+    initTopBar(toastLabels);
+  }
+
+  // Preserve hash when switching language
+  document.querySelector<HTMLAnchorElement>("[data-lang-switch]")?.addEventListener("click", function (e) {
+    e.preventDefault();
+    const base = this.dataset.switchHref ?? this.href;
+    window.location.href = base + window.location.hash;
+  });
+</script>

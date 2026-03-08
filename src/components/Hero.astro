@@ -1,0 +1,129 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale, PersonalInfo } from "../data/types";
+import { statusConfig } from "../data/content/shared";
+
+interface Props {
+  personal: PersonalInfo;
+  lang?: Locale;
+}
+
+const { personal, lang = Language.ES } = Astro.props;
+const ui = ContentStore.getUiCopy(lang);
+const copy = ui.hero;
+const fileMeta = ui.fileMeta.home;
+
+const codeLines = [
+  { ln: 1, content: "" },
+  { ln: 2, content: `<span class="text-editor-keyword">interface</span> <span class="text-editor-type">${copy.codeTypeName}</span> {` },
+  { ln: 3, content: '  <span class="text-editor-variable">name</span>: <span class="text-editor-string">"' + personal.name + '"</span>;' },
+  { ln: 4, content: '  <span class="text-editor-variable">role</span>: <span class="text-editor-string">"' + personal.role + '"</span>;' },
+  { ln: 5, content: '  <span class="text-editor-variable">location</span>: <span class="text-editor-string">"' + personal.location + '"</span>;' },
+  { ln: 6, content: '  <span class="text-editor-variable">experience</span>: <span class="text-editor-string">"' + personal.experience + '"</span>;' },
+  { ln: 7, content: "}" },
+  { ln: 8, content: "" },
+  { ln: 9, content: `<span class="text-editor-keyword">const</span> <span class="text-editor-function">${copy.codeFunctionName}</span> = (): <span class="text-editor-type">${copy.codeTypeName}</span> => ({` },
+  { ln: 10, content: `  <span class="text-editor-variable">${copy.codeStatusKey}</span>: <span class="text-editor-string">"${copy.codeStatusValue}"</span>,` },
+  { ln: 11, content: `  <span class="text-editor-variable">${copy.codePassionKey}</span>: <span class="text-editor-string">"${copy.codePassionValue}"</span>,` },
+  { ln: 12, content: `  <span class="text-editor-variable">${copy.codeFocusKey}</span>: <span class="text-editor-string">"${copy.codeFocusValue}"</span>,` },
+  { ln: 13, content: "});" },
+];
+---
+
+<section id="home" data-file-view class="is-file-active relative flex flex-col border-b border-border xl:min-h-[640px]">
+  <div class="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,46%)_minmax(0,54%)] flex-1 lg:min-h-[620px]">
+    <div class="hero-editor-pane lg:border-r">
+      <div class="p-6">
+        <div class="text-[11px] text-editor-dim mb-4 flex items-center gap-2">
+          <span class={`font-bold ${fileMeta.colorClass}`}>{fileMeta.type}</span>
+          <span>{fileMeta.name}</span>
+        </div>
+
+        <div class="font-mono text-sm leading-7">
+          {codeLines.map((line) => (
+            <div class="hero-code-line group">
+              <span class="hero-line-number">
+                {line.ln}
+              </span>
+              <span class="text-editor-text" set:html={line.content || "&nbsp;"}></span>
+            </div>
+          ))}
+          <div class="hero-cursor-line group">
+            <span class="hero-line-number">14</span>
+            <span class="animate-blink h-4 w-0.5 bg-neon-cyan"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col justify-center p-8 lg:p-14">
+      <div class="hero-preview-divider" data-animate data-delay="100">
+        <div class="hero-preview-divider__line hero-preview-divider__line--left"></div>
+        <span class="text-[10px] text-editor-dim tracking-widest uppercase">{copy.previewLabel}</span>
+        <div class="hero-preview-divider__line hero-preview-divider__line--right"></div>
+      </div>
+
+      <div class="mb-6" data-animate data-delay="200">
+        <div class="text-[11px] text-neon-cyan tracking-widest mb-2">{copy.subtitle}</div>
+        <h1 class="text-4xl lg:text-5xl font-bold text-editor-text mb-2 leading-tight">{personal.name}</h1>
+        <div class="text-xl text-neon-cyan">{personal.role}</div>
+      </div>
+
+      <div class="flex flex-wrap gap-4 mb-6 text-xs text-editor-dim" data-animate data-delay="300">
+        <span class="flex items-center gap-1">{personal.location}</span>
+        <span class="flex items-center gap-1">{personal.experience}</span>
+        <span class={`flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${statusConfig.production.color} ${statusConfig.production.bg} ${statusConfig.production.border}`}>
+          <span class="h-1 w-1 rounded-full animate-pulse" style={`background: ${statusConfig.production.dot}; box-shadow: 0 0 4px ${statusConfig.production.dot};`}></span>
+          {copy.available}
+        </span>
+      </div>
+
+      <p class="text-editor-dim text-sm leading-relaxed mb-8 max-w-lg" data-animate data-delay="400">{personal.description}</p>
+
+      
+      <div class="mb-8 grid gap-3 sm:grid-cols-3" data-animate data-delay="450">
+        <div class="hero-stat-card">
+          <div class="text-[10px] uppercase tracking-[0.14em] text-editor-comment">{copy.built}</div>
+          <div class="mt-2 text-sm text-neon-green">{copy.builtValue}</div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="text-[10px] uppercase tracking-[0.14em] text-editor-comment">{copy.mode}</div>
+          <div class="mt-2 text-sm text-neon-cyan">{copy.modeValue}</div>
+        </div>
+        <div class="hero-stat-card">
+          <div class="text-[10px] uppercase tracking-[0.14em] text-editor-comment">{copy.focus}</div>
+          <div class="mt-2 text-sm text-neon-pink">{copy.focusValue}</div>
+        </div>
+      </div>
+      
+      <div class="flex flex-wrap gap-3" data-animate data-delay="500">
+        <a
+          href={"mailto:" + personal.email}
+          class="btn-neon action-btn action-btn--cyan"
+        >
+          <span class="icon-symbol text-[18px]" aria-hidden="true">mail</span>
+          {copy.contact}
+        </a>
+        <a
+          href={personal.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-neon action-btn action-btn--muted action-btn--muted-purple"
+        >
+          <i class="fa-brands fa-github text-[14px]" aria-hidden="true"></i>
+          {copy.github}
+        </a>
+        <a
+          href={personal.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-neon action-btn action-btn--muted action-btn--muted-cyan"
+        >
+          <i class="fa-brands fa-linkedin-in text-[14px]" aria-hidden="true"></i>
+          {copy.linkedin}
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,94 @@
+---
+import { ContentStore, Language } from "../data/content";
+import type { Locale, Skill } from "../data/types";
+
+interface Props {
+  skills: Skill[];
+  lang?: Locale;
+}
+
+const { skills, lang = Language.ES } = Astro.props;
+const copy = ContentStore.getUiCopy(lang).focus;
+
+const principleAccentMap: Record<string, string> = {
+  "text-neon-cyan": "#59d8ff",
+  "text-neon-pink": "#ff7ab6",
+  "text-neon-purple": "#9f93ff",
+  "text-neon-green": "#67f7bf",
+};
+
+function getPrincipleAccent(colorClass: string): string {
+  return principleAccentMap[colorClass] || "#59d8ff";
+}
+---
+
+<section id="focus" data-file-view class="border-t border-border">
+  <div class="p-6 lg:p-12 relative overflow-hidden">
+    <div class="pointer-events-none absolute -top-24 left-10 h-64 w-64 rounded-full bg-neon-cyan/15 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-20 right-0 h-72 w-72 rounded-full bg-neon-pink/15 blur-3xl"></div>
+
+    <div class="mx-auto w-full max-w-6xl">
+      <div class="section-shell p-5 lg:p-7">
+        <div class="section-header" data-animate>
+          <div>
+            <div class="section-eyebrow mb-2">{copy.lead}</div>
+            <h2 class="text-3xl font-bold text-editor-text">{copy.title}</h2>
+            <p class="section-copy mt-3">{copy.description}</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="metric-pill"><strong>{copy.fileLabel}</strong></span>
+            <span class="metric-pill"><strong>{skills.length}</strong> {copy.priorities}</span>
+          </div>
+        </div>
+
+        <div class="mb-4 flex items-center justify-between text-[11px]">
+          <div class="text-editor-comment">{copy.fileLabel}</div>
+          <div class="text-editor-comment">{copy.updated}</div>
+        </div>
+
+        <div class="space-y-7">
+          {skills.map((skill, i) => (
+            <div class="group py-1.5" data-animate data-delay={i * 100 + ""}>
+            <div class="flex items-center justify-between mb-2.5">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="text-editor-comment text-xs shrink-0">- [x]</span>
+                <span class="text-sm text-editor-text font-medium truncate">
+                  <span>**</span><span style={`color: ${skill.color}; text-shadow: 0 0 10px ${skill.color}66;`}>{skill.name}</span><span >**</span>
+                </span>
+              </div>
+              <span class="text-xs font-bold font-mono px-2 py-0.5 rounded border shrink-0" style={`color: ${skill.color}; border-color: ${skill.color}66; box-shadow: 0 0 12px ${skill.color}33 inset;`}>
+                `{skill.level}%`
+              </span>
+            </div>
+
+            <p class="text-xs text-editor-dim mb-3 pl-12 group-hover:text-editor-text transition-colors">&gt; {skill.description}</p>
+
+            <div class="pl-12 relative">
+              <span class="focus-anchor" style={`--focus-color: ${skill.color};`}></span>
+              <div class="h-2.5 rounded-full overflow-hidden relative focus-bar-track">
+                <div class="h-full rounded-full focus-bar-fill focus-glow-bar" style={`width: ${skill.level}%; --focus-color: ${skill.color};`}></div>
+              </div>
+            </div>
+
+            <div class="pl-12 mt-3">
+              <div class="h-px bg-gradient-to-r from-white/0 via-[#3d5f85] to-white/0"></div>
+            </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="mt-10 grid grid-cols-1 gap-4 border-t border-border pt-5 md:grid-cols-2" data-animate data-delay="600">
+          {copy.principles.map((principle) => (
+            <div class="focus-principle-card" style={`--principle-accent: ${getPrincipleAccent(principle.color)};`}>
+              <div class="flex items-center gap-2 text-xs text-editor-dim">
+                <span class={`mr-2 ${principle.color} focus-principle-icon`}>&gt;</span>
+                <span class="font-medium text-editor-text">{principle.title}</span>
+              </div>
+              <div class="mt-2 pl-6 text-xs leading-relaxed text-editor-comment">"{principle.desc}"</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

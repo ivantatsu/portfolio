@@ -1,0 +1,55 @@
+---
+import type { ExplorerNode } from "../data/types";
+
+interface Props {
+  node: ExplorerNode;
+}
+
+const { node } = Astro.props;
+const isFolder = node.kind === "folder";
+const isOpen = node.defaultOpen !== false;
+---
+
+<div class="sidebar-tree-branch" data-tree-node data-node-id={node.id}>
+  {isFolder ? (
+    <>
+      <button
+        type="button"
+        data-folder-toggle
+        data-folder-id={node.id}
+        data-open={isOpen ? "true" : "false"}
+        aria-expanded={isOpen ? "true" : "false"}
+        class={`sidebar-folder-toggle ${isOpen ? "is-folder-open" : ""}`}
+      >
+        <span class="sidebar-folder-chevron" data-folder-chevron>{isOpen ? "v" : ">"}</span>
+        <span class="sidebar-folder-glyph" data-folder-glyph>{isOpen ? "folder_open" : "folder"}</span>
+        <span class="text-[11px] truncate text-editor-text">{node.name}</span>
+      </button>
+
+      <div
+        class:list={["sidebar-folder-children", !isOpen && "sidebar-tree-node--hidden"]}
+        data-folder-children
+        data-folder-children-for={node.id}
+      >
+        {node.children.map((child) => (
+          <Astro.self node={child} />
+        ))}
+      </div>
+    </>
+  ) : node.href ? (
+    <a
+      href={node.href}
+      data-file-link
+      data-file-id={node.href.replace("#", "")}
+      class={`sidebar-file-link ${node.href === "#home" ? "is-file-active" : ""}`}
+    >
+      <span class={`rounded px-1 py-[1px] text-[9px] font-bold ${node.colorClass || "text-editor-dim"}`}>{node.tag}</span>
+      <span class="text-[11px] truncate">{node.name}</span>
+    </a>
+  ) : (
+    <div class="sidebar-file-link opacity-70">
+      <span class={`rounded px-1 py-[1px] text-[9px] font-bold ${node.colorClass || "text-editor-dim"}`}>{node.tag}</span>
+      <span class="text-[11px] truncate">{node.name}</span>
+    </div>
+  )}
+</div>
