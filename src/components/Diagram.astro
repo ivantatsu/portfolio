@@ -1,0 +1,176 @@
+﻿---
+import infraDiagramConfig from "../data/diagram/infraDiagram.json";
+import "../styles/components/infra-diagram.css";
+import DiagramNode from "./DiagramNode.astro";
+
+type StyleMap = Record<string, string>;
+
+type Icon = {
+  name: string;
+  class?: string;
+};
+
+type DiagramZone = {
+  class?: string;
+  labelKey?: string;
+  label?: string;
+  labelClass?: string;
+  labelIcon?: Icon;
+  items: unknown[];
+  style?: StyleMap;
+};
+
+type DiagramItem =
+  | {
+      type: "row";
+      class?: string;
+      items: unknown[];
+      style?: StyleMap;
+    }
+  | {
+      type: "arrow";
+      class?: string;
+      direction?: "down" | "up" | "left" | "right";
+      lineClass?: string;
+      style?: StyleMap;
+    }
+  | {
+      type: "split";
+      class?: string;
+      connectorClass?: string;
+      style?: StyleMap;
+      connectorStyle?: StyleMap;
+    }
+  | {
+      type: "zones";
+      class?: string;
+      zones: DiagramZone[];
+      style?: StyleMap;
+    }
+  | {
+      type: "base";
+      class?: string;
+      labelKey?: string;
+      label?: string;
+      labelClass?: string;
+      style?: StyleMap;
+    };
+
+type DiagramConfig = {
+  containerClass?: string;
+  gridClass?: string;
+  items: DiagramItem[];
+};
+
+interface Props {
+  config?: DiagramConfig;
+  labels?: Record<string, string>;
+}
+
+const { config = infraDiagramConfig as DiagramConfig, labels = {} } = Astro.props;
+
+const containerClass = config.containerClass ?? "infra-diagram-container";
+const gridClass = config.gridClass ?? "infra-grid";
+
+const joinClass = (...classes: Array<string | undefined | null | false>) =>
+  classes.filter(Boolean).join(" ");
+
+const styleToString = (style?: StyleMap) =>
+  style
+    ? Object.entries(style)
+        .map(([key, value]) => `${key}:${value}`)
+        .join(";")
+    : undefined;
+
+const resolveText = (text?: string, labelKey?: string) =>
+  text ?? (labelKey ? labels[labelKey] ?? labelKey : "");
+
+const getArrowClass = (direction?: "down" | "up" | "left" | "right") => {
+  switch (direction) {
+    case "up":
+      return "arrow-up";
+    case "left":
+      return "arrow-left";
+    case "right":
+      return "arrow-right";
+    case "down":
+    default:
+      return "arrow-down";
+  }
+};
+---
+
+<div class={containerClass}>
+  <div class={gridClass}>
+    {config.items.map((item) => {
+      if (item.type === "row") {
+        return (
+          <div class={joinClass("infra-row", item.class)} style={styleToString(item.style)}>
+            {item.items.map((node) => (
+              <DiagramNode node={node} labels={labels} />
+            ))}
+          </div>
+        );
+      }
+
+      if (item.type === "arrow") {
+        return (
+          <div class={joinClass("infra-arrow", item.class)}>
+            <div
+              class={joinClass(getArrowClass(item.direction), item.lineClass)}
+              style={styleToString(item.style)}
+            ></div>
+          </div>
+        );
+      }
+
+      if (item.type === "split") {
+        return (
+          <div class={joinClass("infra-arrows-split", item.class)} style={styleToString(item.style)}>
+            <div
+              class={joinClass("split-connector", item.connectorClass)}
+              style={styleToString(item.connectorStyle)}
+            ></div>
+          </div>
+        );
+      }
+
+      if (item.type === "zones") {
+        return (
+          <div class={joinClass("infra-row", item.class)} style={styleToString(item.style)}>
+            {item.zones.map((zone) => {
+              const labelText = resolveText(zone.label, zone.labelKey);
+              return (
+                <div class={joinClass("infra-zone", zone.class)} style={styleToString(zone.style)}>
+                  {labelText ? (
+                    <div class={joinClass("zone-label", zone.labelClass)}>
+                      {zone.labelIcon ? (
+                        <span class={joinClass("icon-symbol", zone.labelIcon.class)}>{zone.labelIcon.name}</span>
+                      ) : null}
+                      {labelText}
+                    </div>
+                  ) : null}
+                  {zone.items.map((node) => (
+                    <DiagramNode node={node} labels={labels} />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      if (item.type === "base") {
+        const labelText = resolveText(item.label, item.labelKey);
+        return (
+          <br/>
+          <div class={joinClass("infra-base", item.class)} style={styleToString(item.style)}>
+            {labelText ? <div class={joinClass("base-label", item.labelClass)}>{labelText}</div> : null}
+          </div>
+        );
+      }
+
+      return null;
+    })}
+  </div>
+</div>

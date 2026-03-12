@@ -1,0 +1,102 @@
+﻿{
+  "containerClass": "infra-diagram-container text-editor-dim",
+  "gridClass": "infra-grid",
+  "items": [
+    {
+      "type": "row",
+      "class": "public-zone",
+      "items": [
+        {
+          "type": "node",
+          "class": "internet",
+          "icon": { "name": "public" },
+          "labelKey": "internet"
+        }
+      ]
+    },
+    { "type": "arrow", "direction": "down" },
+    {
+      "type": "row",
+      "class": "dmz-zone",
+      "items": [
+        {
+          "type": "node",
+          "class": "traefik",
+          "tag": { "labelKey": "edgeProxy", "class": "node-tag--yellow" },
+          "icon": { "name": "router", "class": "text-neon-yellow" },
+          "labelKey": "traefik",
+          "metaKey": "sslRouting"
+        }
+      ]
+    },
+    { "type": "arrow", "direction": "down" },
+    {
+      "type": "row",
+      "class": "docker-layer",
+      "items": [
+        {
+          "type": "node",
+          "class": "docker",
+          "tag": { "labelKey": "runtime" },
+          "icon": { "name": "terminal", "class": "text-neon-cyan" },
+          "labelKey": "docker",
+          "metaKey": "containerOrchestration"
+        }
+      ]
+    },
+    { "type": "arrow", "direction": "down" },
+    { "type": "split" },
+    {
+      "type": "zones",
+      "class": "split-zones",
+      "zones": [
+        {
+          "class": "public-apps",
+          "labelKey": "publicApps",
+          "items": [
+            {
+              "type": "group",
+              "class": "infra-node-group",
+              "items": [
+                { "type": "node", "variant": "small", "class": "mb-2", "labelKey": "portfolio" },
+                { "type": "node", "variant": "small", "class": "mb-2", "labelKey": "miniPaas" },
+                { "type": "node", "variant": "small", "labelKey": "others" }
+              ]
+            }
+          ]
+        },
+        {
+          "class": "private-vpn",
+          "labelKey": "wireguardVpn",
+          "labelClass": "flex items-center gap-2",
+          "labelIcon": { "name": "lock", "class": "text-[10px]" },
+          "items": [
+            {
+              "type": "group",
+              "class": "infra-node-group flex flex-col items-center",
+              "items": [
+                {
+                  "type": "node",
+                  "class": "gitlab",
+                  "icon": { "name": "account_tree", "class": "text-neon-pink" },
+                  "labelKey": "gitlab",
+                  "metaKey": "gitlabInternal"
+                },
+                { "type": "connector", "variant": "vertical", "labelKey": "mirrorSync" },
+                {
+                  "type": "node",
+                  "variant": "mini",
+                  "icon": { "name": "cloud_done", "class": "text-neon-purple !text-[14px]" },
+                  "labelKey": "github",
+                  "labelClass": "font-bold text-[10px]"
+                },
+                { "type": "node", "variant": "small", "class": "mt-2 w-full", "labelKey": "gitlabRunners" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    { "type": "base", "class": "mt-6", "labelKey": "baseOs" }
+  ]
+}

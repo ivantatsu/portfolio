@@ -95,7 +95,7 @@ export const techMetaMap: Record<string, TechMeta> = {
   Tomcat: { type: "ops", fileType: "server", color: "#ffe566", iconSlug: "apachetomcat", iconHex: "ffe566" },
   WebLogic: { type: "ops", fileType: "server", color: "#e066ff", iconSlug: "oracle", iconHex: "e066ff", iconUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/oracle/oracle-original.svg" },
   Nginx: { type: "ops", fileType: "server", color: "#00e676", iconSlug: "nginx", iconHex: "00e676" },
-  Linux: { type: "ops", fileType: ".yml", color: "#ffd600", iconSlug: "linux", iconHex: "ffd600" },
+  Linux: { type: "ops", fileType: "so", color: "#ffd600", iconSlug: "linux", iconHex: "ffd600" },
 };
 
 export const statusConfig = {

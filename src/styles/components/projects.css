@@ -1,0 +1,34 @@
+﻿.project-query-ok {
+  margin-top: 0.5rem;
+  margin-left: 1.5rem;
+}
+
+.project-query-ok__text {
+  font-size: 11px;
+  color: #6ce47e;
+  font-style: italic;
+}
+
+.project-json-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #0c1f37;
+  padding: 1rem;
+}
+
+.project-json-card.is-selected {
+  background-color: color-mix(in srgb, var(--neon-cyan) 6%, #0c1f37) !important;
+  outline: 1px solid rgba(89, 216, 255, 0.35) !important;
+  outline-offset: -1px;
+  border-color: rgba(89, 216, 255, 0.38) !important;
+  box-shadow:
+    inset 3px 0 0 var(--neon-cyan),
+    inset 0 0 0 1px rgba(89, 216, 255, 0.18),
+    0 18px 36px rgba(4, 13, 23, 0.42);
+  transform: translateY(-2px);
+}
+
+.project-json-card.is-selected::after {
+  display: none;
+}

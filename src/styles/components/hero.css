@@ -1,0 +1,69 @@
+﻿.hero-editor-pane {
+  overflow: auto;
+  border-color: var(--border-color);
+  background: rgba(17, 33, 58, 0.3);
+}
+
+.hero-code-line {
+  display: flex;
+  border-radius: 0.25rem;
+  margin: 0 -0.5rem;
+  padding: 0 0.5rem;
+}
+
+.hero-code-line:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.hero-line-number {
+  width: 2rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  padding-top: 3px;
+  font-size: 11px;
+  text-align: right;
+  color: var(--text-dim);
+  user-select: none;
+}
+
+.hero-code-line:hover .hero-line-number {
+  color: rgba(149, 167, 194, 0.8);
+}
+
+.hero-cursor-line {
+  display: flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  margin: 0 -0.5rem;
+  padding: 0 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.hero-preview-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.hero-preview-divider__line {
+  height: 1px;
+  flex: 1;
+}
+
+.hero-preview-divider__line--left {
+  background: linear-gradient(90deg, transparent, rgba(89, 216, 255, 0.3));
+}
+
+.hero-preview-divider__line--right {
+  background: linear-gradient(270deg, transparent, rgba(89, 216, 255, 0.3));
+}
+
+.hero-stat-card {
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  background: rgba(10, 24, 41, 0.88);
+  padding: 0.75rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+

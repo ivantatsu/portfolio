@@ -1,7 +1,9 @@
----
+﻿---
+import "../styles/components/ide-overlays.css";
 import { ContentStore, Language } from "../data/content";
 import type { Locale } from "../data/types";
-import InfraDiagram from "./InfraDiagram.astro";
+import Diagram from "./Diagram.astro";
+import infraDiagramConfig from "../data/diagram/infraDiagram.json";
 
 interface Props {
   lang?: Locale;
@@ -222,7 +224,7 @@ const ui = ContentStore.getUiCopy(lang);
          </p>
       </div>
       <div class="overflow-auto max-h-[60vh] bg-sidebar/30">
-        <InfraDiagram labels={ui.infraDiagram} />
+        <Diagram labels={ui.infraDiagram} config={infraDiagramConfig} />
       </div>
       <div class="p-4 border-t border-border flex justify-end gap-3 bg-[#081728]/30">
         <div class="flex items-center gap-4 text-[10px] text-editor-comment uppercase tracking-widest mr-auto pl-2">

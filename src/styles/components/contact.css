@@ -1,0 +1,19 @@
+﻿.contact-link-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  line-height: 1.4;
+}
+
+.contact-link-row a {
+  color: var(--neon-green);
+  text-shadow: 0 0 8px #67f7bf3d;
+  transition: color 0.25s ease, text-shadow 0.25s ease;
+  word-break: break-all;
+}
+
+.contact-link-row a:hover {
+  color: var(--neon-pink);
+  text-shadow: 0 0 8px #ff7ab63d;
+}

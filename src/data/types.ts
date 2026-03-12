@@ -6,7 +6,7 @@ export type TimelineItemType = "experience" | "education";
 export type ProjectStatus = "production" | "development" | "concept";
 export type FileId = "home" | "focus" | "stack" | "projects" | "timeline" | "contact";
 export type TechType = "frontend" | "backend" | "data" | "ops" | "testing" | "other";
-export type FileType = ".astro" | ".tsx" | ".css" | ".ts" | ".sql" | ".yml" | ".test.ts" | ".json" | ".java" | ".py" | ".rs" | ".lua" |".jsp"| "cloud" | "server" | "qa" | "git" | "proxy" | "ops" ;
+export type FileType = ".astro" | ".tsx" | ".css" | ".ts" | ".sql" | ".yml" | ".test.ts" | ".json" | ".java" | ".py" | ".rs" | ".lua" |".jsp"| "cloud" | "server" | "qa" | "git" | "proxy" | "ops" | "so" ;
 export type ExplorerItemKind = "folder" | "file";
 export type ExplorerNode = ExplorerItem & { children: ExplorerNode[] };
 

@@ -1,0 +1,97 @@
+﻿.focus-anchor {
+  position: absolute;
+  left: 34px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  transform: translateY(-50%);
+  background: var(--focus-color);
+  box-shadow: 0 0 8px var(--focus-color);
+}
+
+.focus-bar-track {
+  background:
+    linear-gradient(90deg, #081224, #0b1a30),
+    repeating-linear-gradient(90deg, #ffffff12 0 7px, transparent 7px 14px);
+  border: 1px solid #345b83;
+}
+
+.focus-bar-fill {
+  position: relative;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--focus-color) 45%, #001018 55%), var(--focus-color)),
+    repeating-linear-gradient(90deg, #ffffff33 0 10px, transparent 10px 20px);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--focus-color) 65%, transparent), 0 0 20px color-mix(in srgb, var(--focus-color) 35%, transparent), inset 0 0 6px #ffffff20;
+}
+
+.focus-bar-fill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 20%, #ffffff44 45%, transparent 70%);
+  animation: focusSweep 2s linear infinite;
+}
+
+.focus-glow-bar {
+  position: relative;
+}
+
+.focus-glow-bar::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  transform: translate(30%, -50%);
+  background: var(--focus-color);
+  filter: blur(1px);
+  box-shadow: 0 0 8px var(--focus-color), 0 0 16px var(--focus-color);
+  animation: focusPulse 1.8s ease-in-out infinite;
+}
+
+.focus-principle-card {
+  border: 1px solid var(--border-color);
+  border-left-width: 2px;
+  border-left-color: var(--principle-accent);
+  background: linear-gradient(180deg, rgba(16, 36, 63, 0.33) 0%, rgba(13, 29, 50, 0.33) 100%);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--principle-accent) 20%, transparent);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.focus-principle-card:hover {
+  transform: translateY(-2px);
+}
+
+.focus-principle-icon {
+  text-shadow: 0 0 10px currentColor;
+}
+
+@keyframes focusPulse {
+
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translate(30%, -50%) scale(0.9);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(30%, -50%) scale(1.1);
+  }
+}
+
+@keyframes focusSweep {
+  from {
+    transform: translateX(-120%);
+  }
+
+  to {
+    transform: translateX(120%);
+  }
+}
+

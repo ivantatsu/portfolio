@@ -1,0 +1,115 @@
+﻿---
+import DiagramNode from "./DiagramNode.astro";
+
+type StyleMap = Record<string, string>;
+
+type Icon = {
+  name: string;
+  class?: string;
+};
+
+type Tag = {
+  labelKey?: string;
+  text?: string;
+  class?: string;
+};
+
+type DiagramNodeType =
+  | {
+      type: "node";
+      variant?: "default" | "small" | "mini";
+      class?: string;
+      icon?: Icon;
+      labelKey?: string;
+      text?: string;
+      labelClass?: string;
+      metaKey?: string;
+      meta?: string;
+      metaClass?: string;
+      tag?: Tag;
+      style?: StyleMap;
+    }
+  | {
+      type: "group";
+      class?: string;
+      items: DiagramNodeType[];
+      style?: StyleMap;
+    }
+  | {
+      type: "connector";
+      variant?: "vertical";
+      class?: string;
+      lineClass?: string;
+      labelKey?: string;
+      label?: string;
+      labelClass?: string;
+      arrowClass?: string;
+      style?: StyleMap;
+      lineStyle?: StyleMap;
+    };
+
+interface Props {
+  node: DiagramNodeType;
+  labels?: Record<string, string>;
+}
+
+const { node, labels = {} } = Astro.props;
+
+const joinClass = (...classes: Array<string | undefined | null | false>) =>
+  classes.filter(Boolean).join(" ");
+
+const styleToString = (style?: StyleMap) =>
+  style
+    ? Object.entries(style)
+        .map(([key, value]) => `${key}:${value}`)
+        .join(";")
+    : undefined;
+
+const resolveText = (text?: string, labelKey?: string) =>
+  text ?? (labelKey ? labels[labelKey] ?? labelKey : "");
+
+const getNodeBaseClass = (variant?: "default" | "small" | "mini") => {
+  switch (variant) {
+    case "small":
+      return "infra-node-small";
+    case "mini":
+      return "infra-node github-node-mini";
+    case "default":
+    default:
+      return "infra-node";
+  }
+};
+---
+
+{node.type === "group" ? (
+  <div class={joinClass(node.class)} style={styleToString(node.style)}>
+    {node.items.map((child) => (
+      <DiagramNode node={child} labels={labels} />
+    ))}
+  </div>
+) : null}
+
+{node.type === "connector" ? (
+  <div class={joinClass("mirror-vertical-connection", node.class)} style={styleToString(node.style)}>
+    <div class={joinClass("mirror-line", node.lineClass)} style={styleToString(node.lineStyle)}></div>
+    {resolveText(node.label, node.labelKey) ? (
+      <div class={joinClass("mirror-label", node.labelClass)}>{resolveText(node.label, node.labelKey)}</div>
+    ) : null}
+    <div class={joinClass("mirror-arrow", node.arrowClass)}></div>
+  </div>
+) : null}
+
+{node.type === "node" ? (
+  <div class={joinClass(getNodeBaseClass(node.variant), node.class)} style={styleToString(node.style)}>
+    {node.tag && resolveText(node.tag.text, node.tag.labelKey) ? (
+      <div class={joinClass("node-tag", node.tag.class)}>{resolveText(node.tag.text, node.tag.labelKey)}</div>
+    ) : null}
+    {node.icon ? <span class={joinClass("icon-symbol", node.icon.class)}>{node.icon.name}</span> : null}
+    {resolveText(node.text, node.labelKey) ? (
+      <span class={node.labelClass}>{resolveText(node.text, node.labelKey)}</span>
+    ) : null}
+    {resolveText(node.meta, node.metaKey) ? (
+      <div class={joinClass("node-meta", node.metaClass)}>{resolveText(node.meta, node.metaKey)}</div>
+    ) : null}
+  </div>
+) : null}
